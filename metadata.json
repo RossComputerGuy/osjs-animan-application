@@ -1,0 +1,15 @@
+{
+  "type": "application",
+  "name": "AniMan",
+  "category": "network",
+  "title": {
+    "en_EN": "AniMan"
+  },
+  "description": {
+    "en_EN": "AniMan"
+  },
+  "files": [
+    "main.js",
+    "main.css"
+  ]
+}
