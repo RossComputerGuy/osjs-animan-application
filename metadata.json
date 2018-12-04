@@ -2,6 +2,7 @@
   "type": "application",
   "name": "AniMan",
   "category": "network",
+  "server": "server.js",
   "title": {
     "en_EN": "AniMan"
   },
