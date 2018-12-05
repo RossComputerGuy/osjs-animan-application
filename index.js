@@ -4,7 +4,9 @@ import {name as applicationName} from './metadata.json';
 import {app,h} from 'hyperapp';
 import {Box,BoxContainer,Menubar,MenubarItem,Tabs,TextField} from '@osjs/gui';
 
-const startApp = (proc,core,metadata) => {
+import * as languages from './locales';
+
+const startApp = (proc,core,metadata,_) => {
   let ws = proc.socket();
   const req = obj => new Promise((resolve,reject) => {
     ws.send(JSON.stringify(obj));
@@ -27,7 +29,7 @@ const startApp = (proc,core,metadata) => {
         if(isNaN(episode)) continue;
         win.on('destroy',() => {
           core.make('osjs/notification',{
-            message: 'Updating '+entry.media.title.userPreferred+' to episode '+episode+'.'
+            message: _('NOTIF_UPDATING',entry.media.title.userPreferred,episode)
           });
           entry.progress = episode;
           req({ type: 'anime.update', vars: entry }).then(console.log).catch(err => core.make('osjs/dialog','alert',{ message: err.message },(btn, value) => {}));
@@ -41,14 +43,14 @@ const startApp = (proc,core,metadata) => {
   });
   core.on('osjs/window:render',onwindowcreate);
   const entry = core.make('osjs/tray',{
-    title: 'AniMan',
+    title: _('TRAY_NAME'),
     oncontextmenu: ev => {
       ev.stopPropagation();
       ev.preventDefault();
       core.make('osjs/contextmenu').show({
         position: ev.target,
         menu: [
-          { label: 'Quit', onclick: () => proc.destroy() }
+          { label: _('QUIT'), onclick: () => proc.destroy() }
         ]
       });
     }
@@ -62,6 +64,8 @@ const startApp = (proc,core,metadata) => {
 
 const register = (core,args,options,metadata) => {
   const proc = core.make('osjs/application',{args,options,metadata});
+  const {translatable} = core.make('osjs/locale');
+  const _ = translatable(languages);
   if(typeof(proc.settings.token) == 'undefined') {
     let ws = proc.socket();
     ws.on('open',() => {
@@ -72,17 +76,17 @@ const register = (core,args,options,metadata) => {
         let client_id = msg.client_id;
         window.open('https://anilist.co/api/v2/oauth/authorize?client_id='+client_id+'&response_type=token');
         ws.close();
-        core.make('osjs/dialog','prompt',{ message: 'Please paste token' },(btn,value) => {
+        core.make('osjs/dialog','prompt',{ message: _('LOGIN') },(btn,value) => {
           if(btn == 'ok') {
             proc.settings.token = value;
             proc.saveSettings();
-            return startApp(proc,core,metadata);
+            return startApp(proc,core,metadata,_);
           }
           return proc.destroy();
         });
       });
     });
-  } else startApp(proc,core,metadata);
+  } else startApp(proc,core,metadata,_);
   return proc;
 };
 osjs.register(applicationName,register);
